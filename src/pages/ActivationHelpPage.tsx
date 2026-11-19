@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle, Copy, ExternalLink, Monitor, Shield, Zap, RefreshCw, ChevronRight, Terminal, AlertTriangle } from 'lucide-react';
+import { CheckCircle, Copy, ExternalLink, Monitor, Shield, Zap, RefreshCw, ChevronRight, Terminal, AlertTriangle, GraduationCap, FileWarning, KeyRound, Bug, Repeat } from 'lucide-react';
 
 interface Method {
   id: string;
@@ -21,12 +21,12 @@ const METHODS: Method[] = [
     id: 'hwid',
     icon: <Shield size={22} />,
     name: 'HWID',
-    badge: 'Recommended',
+    badge: 'Most common',
     badgeColor: '#16a34a',
     target: 'Windows 10 / 11',
     period: 'Permanent',
     internet: true,
-    description: 'Hardware ID (Digital License) activation — the most reliable method. Links a permanent digital licence directly to your hardware. Works exactly like a genuine retail key.',
+    description: 'Hardware ID (digital licence) activation. Ties a digital licence to the PC’s hardware without a licence bought from Microsoft. It is not the same as a genuine key.',
     command: 'irm https://get.activated.win | iex',
     steps: [
       'Click the Start Menu and search for PowerShell',
@@ -65,7 +65,7 @@ const METHODS: Method[] = [
     target: 'Windows / ESU / Office',
     period: 'Permanent',
     internet: false,
-    description: 'Advanced activation method covering Windows, Extended Security Updates (ESU), and Office. Ideal for enterprise environments and older systems.',
+    description: 'Advanced method covering Windows, Extended Security Updates (ESU) and Office, including older systems. Never use it on business PCs: unlicensed software is exactly what a licence audit looks for.',
     command: 'irm https://get.activated.win | iex',
     steps: [
       'Click the Start Menu and search for PowerShell',
@@ -84,7 +84,7 @@ const METHODS: Method[] = [
     target: 'Windows / Office',
     period: '180 Days (auto-renews)',
     internet: true,
-    description: 'Activates Windows and Office for 180 days with an automatic renewal task installed. A good option when HWID is not available for your version.',
+    description: 'Activates Windows and Office for 180 days and installs a scheduled task that keeps renewing it in the background. Used when HWID is not available for a version.',
     command: 'irm https://get.activated.win | iex',
     steps: [
       'Click the Start Menu and search for PowerShell',
@@ -97,6 +97,100 @@ const METHODS: Method[] = [
 ];
 
 const ALT_COMMAND = 'iex (curl.exe -s --doh-url https://1.1.1.1/dns-query https://get.activated.win | Out-String)';
+
+interface Risk {
+  icon: React.ReactNode;
+  title: string;
+  body: React.ReactNode;
+}
+
+const RISKS: Risk[] = [
+  {
+    icon: <FileWarning size={18} />,
+    title: 'It is not a genuine licence',
+    body: 'MAS activates Windows and Office without a licence bought from Microsoft, so the PC does not meet Microsoft’s licence terms and Microsoft will not support it. For a business, that shows up in a software licence audit.',
+  },
+  {
+    icon: <KeyRound size={18} />,
+    title: 'You hand over full control of the PC',
+    body: 'Each command downloads a script from a website and runs it straight away as Administrator. Whoever controls that web address decides what runs on your PC, with full access to your files and passwords.',
+  },
+  {
+    icon: <Bug size={18} />,
+    title: 'One typo can install malware',
+    body: (
+      <>
+        In December 2025, a look-alike address missing one letter (<code style={{ fontFamily: 'monospace', fontSize: '0.92em' }}>get.activate.win</code> instead
+        of <code style={{ fontFamily: 'monospace', fontSize: '0.92em' }}>get.activated.win</code>) gave people malware called Cosmali Loader, which then
+        installed the XWorm remote-access trojan and crypto-mining software.{' '}
+        <a href="https://www.bleepingcomputer.com/news/security/fake-mas-windows-activation-domain-used-to-spread-powershell-malware/"
+          target="_blank" rel="noopener noreferrer" style={{ color: '#b45309', textDecoration: 'underline' }}>
+          Read the report (BleepingComputer)
+        </a>
+      </>
+    ),
+  },
+  {
+    icon: <Repeat size={18} />,
+    title: 'It leaves things running',
+    body: 'Some methods install a scheduled task that keeps contacting outside servers to renew the activation. Software you did not choose keeps running on your PC long after the script finishes.',
+  },
+];
+
+function EducationalBanner() {
+  return (
+    <div role="note" aria-label="Educational purpose notice" style={{
+      maxWidth: 1000, margin: '0 auto 2rem', position: 'relative',
+      background: '#fff7ed', border: '2px solid #fb923c', borderRadius: 16,
+      padding: '1rem 1.15rem', display: 'flex', gap: '0.85rem', alignItems: 'flex-start',
+    }}>
+      <div style={{
+        width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+        background: '#ea580c', color: '#fff',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <GraduationCap size={20} />
+      </div>
+      <div>
+        <div style={{ fontWeight: 700, color: '#7c2d12', fontSize: '0.95rem', marginBottom: '0.25rem', fontFamily: "'Syne',sans-serif" }}>
+          For education and security awareness only
+        </div>
+        <p style={{ fontSize: '0.84rem', color: '#9a3412', lineHeight: 1.65, margin: 0 }}>
+          LvTS keeps this page to show clients how easy it is to find unofficial Windows and Office activation tools,
+          and why running them is unsafe. LvTS does <strong>not</strong> recommend, sell or carry out this kind of activation.
+          To keep a PC safe and legal, use a genuine Microsoft licence.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function RiskSection() {
+  return (
+    <div style={{ maxWidth: 1000, margin: '0 auto 2.5rem', position: 'relative' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.85rem' }}>
+        <AlertTriangle size={16} style={{ color: '#dc2626' }} />
+        <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '1.15rem', color: '#0f172a', margin: 0 }}>
+          Why it is risky
+        </h2>
+      </div>
+      <div className="risk-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.75rem' }}>
+        {RISKS.map(r => (
+          <div key={r.title} style={{
+            background: '#fff', border: '1px solid #fecaca', borderLeft: '4px solid #dc2626',
+            borderRadius: 12, padding: '0.9rem 1rem',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem', color: '#b91c1c' }}>
+              {r.icon}
+              <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.9rem' }}>{r.title}</span>
+            </div>
+            <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.6, margin: 0 }}>{r.body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function CopyButton({ text, label = 'Copy command' }: { text: string; label?: string }) {
   const [copied, setCopied] = useState(false);
@@ -188,25 +282,28 @@ export default function ActivationHelpPage() {
           fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.2em',
           textTransform: 'uppercase', color: '#7c3aed', marginBottom: '0.75rem',
         }}>
-          <Terminal size={14} /> Windows &amp; Office Activation
+          <Terminal size={14} /> Security Awareness · Windows &amp; Office
         </div>
         <h1 style={{
           fontFamily: "'Syne',sans-serif", fontWeight: 800,
           fontSize: 'clamp(1.6rem,4vw,2.75rem)', color: '#0f172a',
           lineHeight: 1.15, marginBottom: '1rem',
         }}>
-          Activate Windows &amp; Office{' '}
-          <span className="grad-text">the Right Way</span>
+          Unofficial Windows &amp; Office Activation:{' '}
+          <span className="grad-text">Easy, but Risky</span>
         </h1>
-        <p style={{ color: '#64748b', fontSize: 'clamp(0.875rem,2vw,1rem)', lineHeight: 1.75, maxWidth: 560, margin: '0 auto' }}>
-          LvTS uses{' '}
+        <p style={{ color: '#64748b', fontSize: 'clamp(0.875rem,2vw,1rem)', lineHeight: 1.75, maxWidth: 600, margin: '0 auto' }}>
           <a href="https://massgrave.dev" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
             Microsoft Activation Scripts (MAS)
           </a>{' '}
-          — a fully open-source, trusted activation tool used by IT professionals worldwide.
-          Select your method below and follow the steps.
+          is a free, open-source tool that activates Windows and Office without a licence bought from Microsoft.
+          Anyone can find it in minutes, and the steps below show how little it takes.
+          Read the risks first.
         </p>
       </div>
+
+      <EducationalBanner />
+      <RiskSection />
 
       {/* Main layout — stacks on mobile, side by side on desktop */}
       <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }} className="activation-layout">
@@ -214,7 +311,7 @@ export default function ActivationHelpPage() {
         {/* Method selector */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
           <div style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: '0.1rem' }}>
-            Select Activation Method
+            Methods shown (for demonstration)
           </div>
           {METHODS.map(m => (
             <MethodCard key={m.id} method={m} selected={selectedId === m.id} onSelect={() => setSelectedId(m.id)} />
@@ -224,7 +321,7 @@ export default function ActivationHelpPage() {
             onMouseEnter={e => (e.currentTarget.style.color = '#7c3aed')}
             onMouseLeave={e => (e.currentTarget.style.color = '#94a3b8')}>
             <ExternalLink size={11} />
-            Powered by MAS — Open Source, MIT Licensed
+            MAS source code on GitHub (independent project, not Microsoft)
           </a>
         </div>
 
@@ -248,7 +345,7 @@ export default function ActivationHelpPage() {
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem', fontFamily: "'Syne',sans-serif" }}>
-                {selected.name} Activation Guide
+                {selected.name}: how it is done
               </div>
               <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
                 {selected.target} · {selected.period}
@@ -313,18 +410,16 @@ export default function ActivationHelpPage() {
               </div>
             )}
 
-            {/* Open source note */}
+            {/* Safety note */}
             <div style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-              background: '#f8fafc', borderRadius: 8, padding: '0.6rem 0.85rem',
-              fontSize: '0.78rem', color: '#64748b', flexWrap: 'wrap',
+              display: 'flex', alignItems: 'flex-start', gap: '0.5rem',
+              background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '0.6rem 0.85rem',
+              fontSize: '0.78rem', color: '#991b1b', lineHeight: 1.55,
             }}>
-              <CheckCircle size={14} style={{ color: '#22c55e', flexShrink: 0 }} />
-              <span>Fully open source · Source verified at{' '}
-                <a href="https://github.com/massgravel/Microsoft-Activation-Scripts" target="_blank"
-                  rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
-                  github.com/massgravel
-                </a>
+              <AlertTriangle size={14} style={{ color: '#dc2626', flexShrink: 0, marginTop: 2 }} />
+              <span>
+                Open source does not mean safe. This one line runs code from the internet with Administrator rights,
+                and a single mistyped letter has already been used to spread malware.
               </span>
             </div>
           </div>
@@ -341,10 +436,10 @@ export default function ActivationHelpPage() {
       }}>
         <div>
           <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.9rem', marginBottom: '0.2rem' }}>
-            Need hands-on help activating your PC?
+            Want your PCs safe and properly licensed?
           </div>
           <div style={{ fontSize: '0.82rem', color: '#64748b' }}>
-            LvTS can activate Windows and Office remotely or in person — Suva &amp; surrounds.
+            Talk to LvTS about genuine Windows &amp; Office licences, or a check-up for a PC that has already run an activation script. Suva &amp; surrounds.
           </div>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -369,9 +464,10 @@ export default function ActivationHelpPage() {
 
       {/* Disclaimer */}
       <p style={{ maxWidth: 1000, margin: '1rem auto 0', textAlign: 'center', fontSize: '0.7rem', color: '#94a3b8', lineHeight: 1.6, padding: '0 0.5rem' }}>
-        Microsoft Activation Scripts (MAS) is an independent open-source project not affiliated with Microsoft Corporation.
-        LvTS provides this tool as a convenience for our customers. Always download scripts only from verified sources.
-        Source:{' '}
+        For education and security awareness only. LvTS does not recommend, sell or carry out unofficial activation.
+        Microsoft Activation Scripts (MAS) is an independent open-source project not affiliated with Microsoft Corporation;
+        it activates Windows and Office without a licence purchased from Microsoft. Use a genuine Microsoft licence.
+        MAS source:{' '}
         <a href="https://github.com/massgravel/Microsoft-Activation-Scripts" target="_blank"
           rel="noopener noreferrer" style={{ color: '#7c3aed' }}>
           github.com/massgravel/Microsoft-Activation-Scripts
@@ -381,6 +477,9 @@ export default function ActivationHelpPage() {
       {/* Responsive styles */}
       <style>{`
         @media (min-width: 768px) {
+          .risk-grid {
+            grid-template-columns: 1fr 1fr !important;
+          }
           .activation-layout {
             flex-direction: row !important;
             align-items: flex-start !important;

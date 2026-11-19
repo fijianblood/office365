@@ -1,7 +1,7 @@
 # office365
 free to use office and windows 
 
-The Windows & Office activation page, as a standalone site (it used to be the
+A security-awareness page for LvTS clients: it shows how easy unofficial Windows & Office activation tools are to find, and why running them is unsafe (education only, not a recommendation). Standalone site (it used to be the
 Activation page on the LvTS website). React + TypeScript + Vite + Tailwind CSS.
 
 ## Run it
